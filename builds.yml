@@ -1,0 +1,15 @@
+---
+vagrant_cloud_account: 'wangkexiong'
+
+default_architectures:
+  - amd64
+
+public:
+  - ubuntu-24.04
+
+# slug box name: text string from standard box name to match
+slugs:
+  - rockylinux-9
+
+do_not_build:
+  - rockylinux
