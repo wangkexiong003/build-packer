@@ -1,0 +1,35 @@
+#cloud-config
+# https://ubuntu.com/server/docs/install/autoinstall-reference
+autoinstall:
+  version: 1
+  early-commands:
+    - systemctl stop ssh
+  identity:
+    hostname: vagrant
+    username: vagrant
+    password: $6$vagrant.$sd6r0/OKL.FIGZbhanVkrLassSxoPRv1h5lkISsmBONqaLUGVXkEcD22Ddak5W8JSxeU0VFkU/We1Y7o4hVO/1
+  packages: [linux-image-generic, linux-cloud-tools-virtual]
+  ssh:
+    install-server: true
+  storage:
+    config:
+      - type: disk
+        id: disk0
+        ptable: msdos
+        grub_device: true
+        match:
+          size: largest
+      - type: partition
+        id: root-partition
+        device: disk0
+        flag: boot
+        size: -1
+      - type: format
+        id: root-partition-fs
+        fstype: ext4
+        label: vagrat-image
+        volume: root-partition
+      - type: mount
+        id: root-mount
+        device: root-partition-fs
+        path: /

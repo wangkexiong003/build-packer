@@ -1,0 +1,142 @@
+{
+  "builders": [
+    {
+      "type": "virtualbox-iso",
+      "boot_command": [
+        "<up><wait><tab> inst.text inst.ks=http://{{.HTTPIP}}:{{.HTTPPort}}/{{user `ks_path`}} hostname={{user `host_name`}}<enter><wait>"
+      ],
+      "boot_wait": "5s",
+      "headless": "{{user `headless`}}",
+      "shutdown_command": "echo 'vagrant' | sudo -S /sbin/halt -h -p",
+      "output_directory": "{{user `build_directory`}}/packer-{{user `template`}}-virtualbox",
+      "guest_os_type": "RedHat_64",
+      "cpus": "{{user `cpus`}}",
+      "memory": "{{user `memory`}}",
+      "hard_drive_interface": "sata",
+      "disk_size": "{{user `disk_size`}}",
+      "guest_additions_url": "{{user `guest_additions_url`}}",
+      "guest_additions_path": "VBoxGuestAdditions_{{.Version}}.iso",
+      "http_directory": "{{user `http_directory`}}",
+      "iso_urls": [
+        "{{user `iso_directory`}}/{{user `iso_name`}}",
+        "{{user `mirror`}}/{{user `mirror_directory`}}/{{user `iso_name`}}"
+      ],
+      "iso_checksum": "{{user `iso_checksum`}}",
+      "ssh_username": "vagrant",
+      "ssh_password": "vagrant",
+      "ssh_port": 22,
+      "ssh_timeout": "{{user `ssh_timeout`}}",
+      "virtualbox_version_file": ".vbox_version",
+      "vm_name": "{{user `template`}}",
+      "vboxmanage": [
+        [
+          "modifyvm",
+          "{{.Name}}",
+          "--nictype1",
+          "virtio"
+        ]
+      ]
+    },
+    {
+      "type": "hyperv-iso",
+      "boot_command": [
+        "<up><wait><tab> inst.text inst.ks=http://{{.HTTPIP}}:{{.HTTPPort}}/{{user `ks_path`}} hostname={{user `host_name`}}<enter><wait>"
+      ],
+      "boot_wait": "5s",
+      "headless": "{{user `headless`}}",
+      "shutdown_command": "echo 'vagrant' | sudo -S /sbin/halt -h -p",
+      "output_directory": "{{user `build_directory`}}/packer-{{user `template`}}-hyperv",
+      "enable_secure_boot": false,
+      "generation": 1,
+      "cpus": "{{user `cpus`}}",
+      "memory": "{{user `memory`}}",
+      "switch_name": "{{user `hyperv_switch`}}",
+      "disk_size": "{{user `disk_size`}}",
+      "disk_block_size": "{{user `vhdx_block_size`}}",
+      "http_directory": "{{user `http_directory`}}",
+      "iso_urls": [
+        "{{user `iso_directory`}}/{{user `iso_name`}}",
+        "{{user `mirror`}}/{{user `mirror_directory`}}/{{user `iso_name`}}"
+      ],
+      "iso_checksum": "{{user `iso_checksum`}}",
+      "communicator": "ssh",
+      "ssh_username": "vagrant",
+      "ssh_password": "vagrant",
+      "ssh_port": 22,
+      "ssh_timeout": "{{user `ssh_timeout`}}",
+      "vm_name": "{{user `template`}}"
+    }
+  ],
+  "provisioners": [
+    {
+      "environment_vars": [
+        "HOME_DIR=/home/vagrant",
+        "http_proxy={{user `http_proxy`}}",
+        "https_proxy={{user `https_proxy`}}",
+        "no_proxy={{user `no_proxy`}}"
+      ],
+      "execute_command": "echo 'vagrant' | {{.Vars}} sudo -S -E bash -eux '{{.Path}}'",
+      "expect_disconnect": true,
+      "scripts": [
+        "packer_script/centos/scripts/networking.sh",
+        "packer_script/_common/sshd.sh",
+        "packer_script/_common/vagrant.sh",
+        "packer_script/_common/motd.sh",
+        "packer_script/centos/scripts/update.sh",
+        "packer_script/_common/virtualbox.sh",
+        "packer_script/centos/scripts/cleanup.sh",
+        "packer_script/_common/minimize.sh"
+      ],
+      "type": "shell"
+    }
+  ],
+  "post-processors": [
+    {
+      "type": "shell-local",
+      "inline": ["echo Preparing for uploading..."]
+    },
+    [
+      {
+        "type": "vagrant",
+        "compression_level": "9",
+        "output": "{{user `build_directory`}}/{{user `box_basename`}}-{{.Provider}}.box"
+      },
+      {
+        "type": "vagrant-cloud",
+        "box_tag": "{{user `cloud_tag`}}",
+        "access_token": "{{user `cloud_token`}}",
+        "version": "{{user `cloud_version`}}"
+      }
+    ]
+  ],
+  "variables": {
+    "build_directory": "packer_build",
+    "http_directory": "packer_script/centos/http",
+    "ks_path": "ks8.cfg",
+    "cpus": "1",
+    "memory": "1024",
+    "disk_size": "65536",
+    "vhdx_block_size": "1",
+    "git_revision": "__unknown_git_revision__",
+    "headless": "true",
+    "hyperv_generation": "1",
+    "hyperv_switch": "Default Switch",
+    "ssh_timeout": "1200s",
+    "host_name": "centos8",
+    "template": "vagrant-centos-8",
+    "box_basename": "centos-8",
+    "guest_additions_url": "",
+    "cloud_token": "{{env `VAGRANT_CLOUD_TOKEN`}}",
+    "cloud_version": "{{isotime \"20060102\"}}",
+    "cloud_tag": "wangkexiong/centos-8",
+    "mirror": "http://mirror.nsc.liu.se/centos-store",
+    "mirror_directory": "8.5.2111/isos/x86_64",
+    "iso_name": "CentOS-8.5.2111-x86_64-boot.iso",
+    "iso_checksum": "9602c69c52d93f51295c0199af395ca0edbe35e36506e32b8e749ce6c8f5b60a",
+    "iso_directory": "packer_iso",
+    "http_proxy": "{{env `http_proxy`}}",
+    "https_proxy": "{{env `https_proxy`}}",
+    "no_proxy": "{{env `no_proxy`}}"
+  }
+}
+
