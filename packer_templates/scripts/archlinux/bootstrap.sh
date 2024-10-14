@@ -67,9 +67,15 @@ echo "++++ ${SCRIPT_NAME}: Installing basic packages.."
 /usr/bin/arch-chroot ${TARGET_DIR} pacman -S --noconfirm gptfdisk openssh syslinux dhcpcd netctl
 
 echo "++++ ${SCRIPT_NAME}: Configuring syslinux.."
-/usr/bin/arch-chroot ${TARGET_DIR} syslinux-install_update -i -a -m
+if [ ! -d "${TARGET_DIR}/boot/syslinux" ]; then
+  echo "++++ ${SCRIPT_NAME}: PATCH - Restore syslinux bios files..."
+  mkdir -p "${TARGET_DIR}/boot/syslinux"
+  cp ${TARGET_DIR}/usr/lib/syslinux/bios/*.c32     ${TARGET_DIR}/boot/syslinux/
+  cp ${TARGET_DIR}/usr/share/syslinux/syslinux.cfg ${TARGET_DIR}/boot/syslinux/
+fi
+/usr/bin/syslinux-install_update -i -a -m -c ${TARGET_DIR}
 /usr/bin/sed -i "s|sda3|${ROOT_PARTITION##/dev/}|" "${TARGET_DIR}/boot/syslinux/syslinux.cfg"
-/usr/bin/sed -i 's/TIMEOUT 50/TIMEOUT 10/' "${TARGET_DIR}/boot/syslinux/syslinux.cfg"
+/usr/bin/sed -i 's/TIMEOUT 50/TIMEOUT 10/'         "${TARGET_DIR}/boot/syslinux/syslinux.cfg"
 
 echo "++++ ${SCRIPT_NAME}: Generating the swap file.."
 /usr/bin/mkdir -p "$(/usr/bin/dirname ${TARGET_DIR}/${SWAPFILE})"

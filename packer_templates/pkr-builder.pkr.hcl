@@ -69,7 +69,9 @@ locals {
 # https://www.packer.io/docs/templates/hcl_templates/blocks/build
 build {
   sources = [
-    "sources.hyperv-iso.vm"
+    "sources.hyperv-iso.vm",
+    "sources.virtualbox-iso.vm",
+    "sources.vmware-iso.vm"
   ]
 
   # Linux Shell scipts
