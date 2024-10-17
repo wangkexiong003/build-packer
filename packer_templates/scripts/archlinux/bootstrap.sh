@@ -53,7 +53,7 @@ if [ -f /etc/pacman.d/_mirrors ]; then
   echo "Server = ${ARCH_REPO}"'/$repo/os/$arch' > /etc/pacman.d/mirrorlist
 else
   MIRRORLIST="https://archlinux.org/mirrorlist/?country=${COUNTRY}&protocol=http&protocol=https&ip_version=4&use_mirror_status=on"
-  /usr/bin/curl -s "${MIRRORLIST}" | /usr/bin/sed 's/^#Server/Server/' > /etc/pacman.d/mirrorlist
+  /usr/bin/curl -fsSL "${MIRRORLIST}" | /usr/bin/sed 's/^#Server/Server/' > /etc/pacman.d/mirrorlist
 fi
 
 echo "++++ ${SCRIPT_NAME}: Bootstrapping the base installation.."

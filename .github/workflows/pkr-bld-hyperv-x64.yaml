@@ -1,0 +1,67 @@
+name: Build vagrant images with hyperv provider
+on:
+  workflow_dispatch:
+  workflow_call:
+
+env:
+  PACKER_GITHUB_API_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+
+jobs:
+  x86_64:
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - archlinux
+          - ubuntu-24.04
+        provider:
+          - hyperv-iso
+    steps:
+      - name: Checkout
+        uses: actions/checkout@main
+      - name: Setup Packer
+        uses: hashicorp/setup-packer@main
+        with:
+          version: latest
+      - name: Packer Init
+        run: packer init -upgrade packer_templates
+      - name: Install FFmpeg
+        uses: FedericoCarboni/setup-ffmpeg@v3
+      - name: Create VM Switch for Hyper-V
+        shell: pwsh
+        run: |
+          Get-PsDrive -PsProvider FileSystem
+          New-VMSwitch -Name "bento" -NetAdapterName "Ethernet" -AllowManagementOS $true
+      - name: Start Desktop Recording
+        shell: pwsh
+        run: |
+          Get-DisplayResolution
+          Start-Process powershell -ArgumentList '-File', .github\workflows\scripts\record.ps1 -WindowStyle Minimized
+          Install-WindowsFeature -Name Hyper-V -IncludeManagementTools
+      - name: Disable Windows Firewall
+        shell: pwsh
+        run: |
+          Set-NetFirewallProfile -Profile Domain,Public,Private -Enabled False
+      - name: Packer Build
+        shell: pwsh
+        continue-on-error: true
+        run: |
+          $provider = "${{ matrix.provider }}.vm"
+          $varFile = "os_pkrvars/$("${{ matrix.os }}".Split('-')[0])/${{ matrix.os }}-x86_64.pkrvars.hcl"
+          packer build -timestamp-ui -force -only="$provider" -var-file="$varFile" -var headless=false -var hyperv_switch_name="Default Switch" packer_templates
+      - name: Stop Desktop Recording
+        run: |
+          del ffmpeg.pid
+          sleep 5s
+      - name: Upload build artifact
+        uses: actions/upload-artifact@main
+        with:
+          name: "${{ matrix.os }}-hyperv-x86_64"
+          path: |
+            desktop_record*.mp4
+            builds/*.box
+            builds/*.json
+          retention-days: 10
+          compression-level: 0 # no compression
+
