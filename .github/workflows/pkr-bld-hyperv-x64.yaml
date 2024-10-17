@@ -1,0 +1,49 @@
+---
+on:
+  workflow_dispatch:
+  workflow_call:
+
+env:
+  PACKER_GITHUB_API_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+
+jobs:
+  x86_64:
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - archlinux
+          - ubuntu-24.04
+        provider:
+          - hyperv-iso
+    steps:
+      - name: Checkout
+        uses: actions/checkout@main
+      - name: Install Chef
+        uses: actionshub/chef-install@3.0.0
+        with:
+          version: 24.2.1058
+      - name: Setup Packer
+        uses: hashicorp/setup-packer@main
+        with:
+          version: latest
+      - name: Create VM Switch for Hyper-V
+        shell: pwsh
+        run: |
+          Get-PsDrive -PsProvider FileSystem
+          pwd
+          New-VMSwitch -Name "bento" -NetAdapterName "Ethernet" -AllowManagementOS $true
+      - name: Packer Init
+        run: packer init -upgrade packer_templates
+      - name: Packer build
+        run: packer build -timestamp-ui -only="${{ matrix.provider }}.vm" -var-file="os_pkrvars/$("${{ matrix.os }}".Split('-')[0])/${{ matrix.os }}-x86_64.pkrvars.hcl" packer_templates
+      - name: Upload build artifact
+        uses: actions/upload-artifact@main
+        with:
+          name: "${{ matrix.os }}-hyperv-x86_64"
+          path: |
+            builds/*.box
+            builds/*.json
+          retention-days: 10
+          compression-level: 0 # no compression
