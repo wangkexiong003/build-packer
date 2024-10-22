@@ -152,6 +152,6 @@ echo "++++ ${SCRIPT_NAME}: Completing installation.."
 
 # Turning network interfaces down to make sure SSH session was dropped on host.
 # More info at: https://www.packer.io/docs/provisioners/shell.html#handling-reboots
-echo "++++ ${SCRIPT_NAME}: Turning down network interfaces and rebooting"
-for i in $(/usr/bin/ip -o link show | /usr/bin/awk -F': ' '{print $2}'); do /usr/bin/ip link set ${i} down; done
+#echo "++++ ${SCRIPT_NAME}: Turning down network interfaces and rebooting"
+#for i in $(/usr/bin/ip -o link show | /usr/bin/awk -F': ' '{print $2}'); do /usr/bin/ip link set ${i} down; done
 /usr/bin/systemctl reboot
