@@ -24,10 +24,15 @@ jobs:
       - name: Install FFmpeg
         uses: FedericoCarboni/setup-ffmpeg@v3
       - name: Install Virtualbox
-        shell: cmd
         run: |
+          $oldPath = $env:PATH
           choco install virtualbox --yes
+          $env:ChocolateyInstall = Convert-Path "$((Get-Command choco).Path)\..\.."
+          Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
           refreshenv
+          $updatePath = ($oldPath.Split(';') + $env:PATH.Split(';')) | Sort-Object -Unique
+          $updatePathStr = [String]::Join(';', $updatePath)
+          Add-Content -Path $env:GITHUB_ENV -Value "PATH=$updatePathStr"
       - name: Start Desktop Recording
         run: |
           Set-DisplayResolution -Width 1920 -Height 1080 -Force
