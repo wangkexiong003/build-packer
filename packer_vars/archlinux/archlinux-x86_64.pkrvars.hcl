@@ -5,5 +5,5 @@ iso_checksum            = "file:https://mirrors.edge.kernel.org/archlinux/iso/la
 vbox_guest_os_type      = "Ubuntu_64"
 vmware_guest_os_type    = "ubuntu-64"
 hyperv_generation       = 2
-boot_command            = ["<enter><wait10><wait10><wait10>", "/usr/bin/curl http://{{ .HTTPIP }}:{{ .HTTPPort }}/archlinux/prepare.archlinux.sh|sed 's/\\r//g'>prepare.archlinux.sh<enter><wait>", "/usr/bin/bash ./prepare.archlinux.sh<enter>"]
+boot_command            = ["<wait10><enter><wait10><wait10><wait10>", "/usr/bin/curl http://{{ .HTTPIP }}:{{ .HTTPPort }}/archlinux/prepare.archlinux.sh|sed 's/\\r//g'>prepare.archlinux.sh<enter><wait>", "/usr/bin/bash ./prepare.archlinux.sh<enter>"]
 box_tag                 = "wangkexiong/archlinux"
