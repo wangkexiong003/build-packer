@@ -35,8 +35,8 @@ echo "++++ ${SCRIPT_NAME}: Destroying magic strings and signatures on ${DISK}.."
 /usr/bin/wipefs --all ${DISK}
 
 echo "++++ ${SCRIPT_NAME}: Creating partition on ${DISK}.."
-/usr/bin/sgdisk --new=1:0:+64M --typecode=1:EF00 ${DISK}
-/usr/bin/sgdisk --new=2:0:0    --typecode=2:8300 ${DISK}
+/usr/bin/sgdisk --new=1:0:+1024M --typecode=1:EF00 ${DISK}
+/usr/bin/sgdisk --new=2:0:0      --typecode=2:8300 ${DISK}
 
 echo "++++ ${SCRIPT_NAME}: Creating filesystem (ext4).."
 /usr/bin/mkfs.fat  -F32 ${EFI_PARTITION}
