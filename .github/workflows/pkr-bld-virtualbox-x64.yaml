@@ -1,0 +1,76 @@
+name: Build vagrant images with virtualbox provider
+on:
+  workflow_dispatch:
+  workflow_call:
+
+env:
+  PACKER_GITHUB_API_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+
+jobs:
+  x86_64:
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - archlinux
+          - ubuntu-24.04
+        provider:
+          - virtualbox-iso
+    steps:
+      - name: Checkout
+        uses: actions/checkout@main
+      - name: Setup Packer
+        uses: hashicorp/setup-packer@main
+        with:
+          version: latest
+      - name: Install FFmpeg
+        uses: FedericoCarboni/setup-ffmpeg@v3
+      - name: Install Virtualbox
+        shell: pwsh
+        run: |
+          $features = Get-WindowsFeature
+          $hyperVFeatures = $features | Where-Object { $_.Name -like "*Hyper-V*" }
+          if ($hyperVFeatures) {
+            foreach ($feature in $hyperVFeatures) {
+              Remove-WindowsFeature -Name $feature.Name
+              Write-Host "Removed: $($feature.Name)"
+            }
+          }
+
+          choco install virtualbox --yes
+          Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
+          refreshenv
+          $virtualBoxPath = (Get-Command vboxmanage).Path | Split-Path
+          echo "$virtualBoxPath" | Out-File -Append -FilePath $env:GITHUB_PATH
+      - name: Start Desktop Recording
+        shell: pwsh
+        run: |
+          Set-DisplayResolution -Width 1920 -Height 1080 -Force
+          Install-WindowsFeature -Name Hyper-V -IncludeManagementTools
+          Start-Process powershell -ArgumentList '-File', .github\workflows\scripts\record.ps1 -WindowStyle Minimized
+          Get-DisplayResolution
+      - name: Packer Init
+        run: packer init -upgrade packer_templates
+      - name: Packer Build
+        shell: pwsh
+        continue-on-error: true
+        env:
+          HCP_CLIENT_ID:     ${{ secrets.HCP_CLIENT_ID }}
+          HCP_CLIENT_SECRET: ${{ secrets.HCP_CLIENT_SECRET }}
+        run: |
+          $provider = "${{ matrix.provider }}.vm"
+          $varFile = "os_pkrvars/$("${{ matrix.os }}".Split('-')[0])/${{ matrix.os }}-x86_64.pkrvars.hcl"
+          packer build -timestamp-ui -force -only="$provider" -var-file="$varFile" -var headless=false packer_templates
+      - name: Stop Desktop Recording
+        run: |
+          del ffmpeg.pid
+          sleep 5s
+      - name: Upload build artifact
+        uses: actions/upload-artifact@main
+        with:
+          name: "${{ matrix.os }}-hyperv-x86_64"
+          path: |
+            desktop_record*.mp4
+          retention-days: 10
+          compression-level: 0
