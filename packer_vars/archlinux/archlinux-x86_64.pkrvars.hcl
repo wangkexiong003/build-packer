@@ -1,0 +1,9 @@
+os_name                 = "archlinux"
+os_arch                 = "x86_64"
+iso_url                 = "https://mirrors.kernel.org/archlinux/iso/latest/archlinux-x86_64.iso"
+iso_checksum            = "file:https://mirrors.edge.kernel.org/archlinux/iso/latest/sha256sums.txt"
+vbox_guest_os_type      = "Ubuntu_64"
+vmware_guest_os_type    = "ubuntu-64"
+hyperv_generation       = 2
+boot_command            = ["<enter><wait10><wait10><wait10>", "/usr/bin/curl http://{{ .HTTPIP }}:{{ .HTTPPort }}/archlinux/prepare.archlinux.sh|sed 's/\\r//g'>prepare.archlinux.sh<enter><wait>", "/usr/bin/bash ./prepare.archlinux.sh<enter>"]
+box_tag                 = "wangkexiong/archlinux"
