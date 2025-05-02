@@ -11,27 +11,67 @@ autoinstall:
   packages: [linux-image-generic, linux-cloud-tools-virtual]
   ssh:
     install-server: true
+
   storage:
+## Layout-short
+#    layout:
+#      name: direct
     config:
-#      - type: disk
-#        id: disk0
-#        ptable: msdos
-#        grub_device: true
-#        match:
-#          size: largest
-#      - type: partition
-#        id: root-partition
-#        device: disk0
-#        flag: boot
-#        size: -1
-#      - type: format
-#        id: root-partition-fs
-#        fstype: ext4
-#        label: vagrat-image
-#        volume: root-partition
-#      - type: mount
-#        id: root-mount
-#        device: root-partition-fs
-#        path: /
-    layout:
-      name: direct
+## Layout-BIOS
+#    - type: disk
+#      id: disk0
+#      ptable: msdos
+#      grub_device: true
+#      match:
+#        size: largest
+#    - type: partition
+#      id: root-partition
+#      device: disk0
+#      flag: boot
+#      size: -1
+#    - type: format
+#      id: root-partition-fs
+#      fstype: ext4
+#      label: vagrat-image
+#      volume: root-partition
+#    - type: mount
+#      id: root-mount
+#      device: root-partition-fs
+#      path: /
+## Layout-UEFI
+    - id: disk0
+      type: disk
+      ptable: gpt
+      wipe: superblock-recursive
+      grub_device: true
+
+    - id: disk0-boot-efi
+      type: partition
+      size: 128M
+      device: disk0
+      flag: boot
+      grub_device: true
+    - id: disk0-boot-efi-fs
+      type: format
+      fstype: fat32
+      volume: disk0-boot-efi
+      label: EFI
+
+    - id: disk0-root
+      type: partition
+      size: -1
+      device: disk0
+    - id: disk0-root-fs
+      type: format
+      fstype: ext4
+      volume: disk0-root
+      label: root
+
+    - type: mount
+      id: disk0-boot-efi-mnt
+      path: /boot/efi
+      device: disk0-boot-efi-fs
+    - type: mount
+      id: disk0-root-mnt
+      path: /
+      device: disk0-root-fs

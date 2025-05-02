@@ -35,27 +35,27 @@ echo "++++ ${SCRIPT_NAME}: Destroying magic strings and signatures on ${DISK}.."
 /usr/bin/wipefs --all ${DISK}
 
 echo "++++ ${SCRIPT_NAME}: Creating partition on ${DISK}.."
-/usr/bin/sgdisk --new=1:0:+1024M --typecode=1:EF00 ${DISK}
-/usr/bin/sgdisk --new=2:0:0      --typecode=2:8300 ${DISK}
+/usr/bin/sgdisk --new=1:0:+128M --typecode=1:EF00 ${DISK}
+/usr/bin/sgdisk --new=2:0:0 --typecode=2:8300 ${DISK}
 
 echo "++++ ${SCRIPT_NAME}: Creating filesystem (ext4).."
-/usr/bin/mkfs.fat  -F32 ${EFI_PARTITION}
+/usr/bin/mkfs.fat -F32 ${EFI_PARTITION}
 /usr/bin/mkfs.ext4 -F -m 0 -q -L root ${ROOT_PARTITION}
 
 echo "++++ ${SCRIPT_NAME}: Mounting ${ROOT_PARTITION} to ${TARGET_DIR}.."
 /usr/bin/mount -o noatime,errors=remount-ro ${ROOT_PARTITION} ${TARGET_DIR}
 mkdir -p ${TARGET_EFI}
-/usr/bin/mount -o noatime,errors=remount-ro ${EFI_PARTITION}  ${TARGET_EFI}
+/usr/bin/mount -o noatime,errors=remount-ro ${EFI_PARTITION} ${TARGET_EFI}
 
 echo "++++ ${SCRIPT_NAME}: Setting pacman mirrors.."
 mkdir -p ${TARGET_DIR}/etc/pacman.d
 mv /etc/pacman.d/mirrorlist ${TARGET_DIR}/etc/pacman.d/mirrorlist.ori
 if [ -f /etc/pacman.d/_mirrors ]; then
   source /etc/pacman.d/_mirrors
-  echo "Server = ${ARCH_REPO}"'/$repo/os/$arch' > /etc/pacman.d/mirrorlist
+  echo "Server = ${ARCH_REPO}"'/$repo/os/$arch' >/etc/pacman.d/mirrorlist
 else
   MIRRORLIST="https://archlinux.org/mirrorlist/?country=${COUNTRY}&protocol=http&protocol=https&ip_version=4&use_mirror_status=on"
-  /usr/bin/curl -fsSL "${MIRRORLIST}" | /usr/bin/sed 's/^#Server/Server/' > /etc/pacman.d/mirrorlist
+  /usr/bin/curl -fsSL "${MIRRORLIST}" | /usr/bin/sed 's/^#Server/Server/' >/etc/pacman.d/mirrorlist
 fi
 
 echo "++++ ${SCRIPT_NAME}: Bootstrapping the base installation.."
@@ -70,12 +70,13 @@ echo "++++ ${SCRIPT_NAME}: Generating the swap file.."
 /usr/bin/mkswap "${TARGET_DIR}/${SWAPFILE}"
 
 echo "++++ ${SCRIPT_NAME}: Generating the filesystem table.."
-/usr/bin/genfstab -p ${TARGET_DIR} >> "${TARGET_DIR}/etc/fstab"
-echo "${SWAPFILE} none swap defaults 0 0" >> ${TARGET_DIR}/etc/fstab
+/usr/bin/genfstab -p ${TARGET_DIR} >>"${TARGET_DIR}/etc/fstab"
+echo "${SWAPFILE} none swap defaults 0 0" >>${TARGET_DIR}/etc/fstab
 
 echo "++++ ${SCRIPT_NAME}: Installing UEFI"
 /usr/bin/arch-chroot ${TARGET_DIR} pacman -S --noconfirm grub efibootmgr dosfstools os-prober mtools
-/usr/bin/arch-chroot ${TARGET_DIR} grub-install --target=x86_64-efi --bootloader-id=grub_uefi --recheck
+/usr/bin/arch-chroot ${TARGET_DIR} grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=GRUB --recheck
+/usr/bin/arch-chroot ${TARGET_DIR} grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=GRUB --recheck --removable
 /usr/bin/arch-chroot ${TARGET_DIR} grub-mkconfig -o /boot/grub/grub.cfg
 
 echo "++++ ${SCRIPT_NAME}: Installing sshd.."
@@ -85,7 +86,7 @@ echo "++++ ${SCRIPT_NAME}: Generating the system configuration script.."
 /usr/bin/install --mode=0755 /dev/null "${TARGET_DIR}${CONFIG_SCRIPT}"
 
 CONFIG_SCRIPT_SHORT=$(/usr/bin/basename "$CONFIG_SCRIPT")
-cat <<-EOF > "${TARGET_DIR}${CONFIG_SCRIPT}"
+cat <<-EOF >"${TARGET_DIR}${CONFIG_SCRIPT}"
   echo ">>>> ${CONFIG_SCRIPT_SHORT}: Configuring hostname, timezone, and keymap.."
   echo '${HOSTNAME}' > /etc/hostname
   /usr/bin/ln -s /usr/share/zoneinfo/${TIMEZONE} /etc/localtime
@@ -146,6 +147,7 @@ echo "++++ ${SCRIPT_NAME}: Completing installation.."
 
 # Turning network interfaces down to make sure SSH session was dropped on host.
 # More info at: https://www.packer.io/docs/provisioners/shell.html#handling-reboots
+# Comment this for github action, but open it on Win11
 #echo "++++ ${SCRIPT_NAME}: Turning down network interfaces and rebooting"
 #for i in $(/usr/bin/ip -o link show | /usr/bin/awk -F': ' '{print $2}'); do /usr/bin/ip link set ${i} down; done
 /usr/bin/systemctl reboot
