@@ -2,4 +2,4 @@
 SCRIPT_NAME="update.sh"
 
 echo "++++ ${SCRIPT_NAME}: Installing Additional Packages..."
-pacman -Syu --noconfirm cifs-utils rsync moreutils
+pacman -Syu --noconfirm which cifs-utils rsync moreutils
