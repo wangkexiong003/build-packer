@@ -31,19 +31,16 @@ jobs:
         with:
           rclone_config: ${{ secrets.RCLONE_CONFIG }}
       - name: Setup vmwareworkstation
-        id: choco-install-vmwareworkstation
         shell: pwsh
         run: |
           choco install vmwareworkstation --yes
-        continue-on-error: true
-      - name: Backup step for vmwareworkstation
-        if: steps.choco-install-vmwareworkstation.outcome == 'failure'
-        shell: pwsh
-        run: |
-          rclone copy gdrive:/download $env:Temp --include "VMware-workstation-full-*.exe"
-          dir $env:Temp\VMware*.exe
-          $installer = Get-Item "$env:Temp\VMware-workstation-full-*.exe"
-          Start-Process -FilePath $installer.FullName -ArgumentList '/s', '/v"/qn EULAS_AGREED=1"' -Wait
+          if ($LASTEXITCODE -ne 0) {
+            Write-Host "Failed installing from Chocolatey, try from Google Drive..."
+            rclone copy gdrive:/download $env:Temp --include "VMware-workstation-full-*.exe"
+            dir $env:Temp\VMware*.exe
+            $installer = Get-Item "$env:Temp\VMware-workstation-full-*.exe"
+            Start-Process -FilePath $installer.FullName -ArgumentList '/s', '/v"/qn EULAS_AGREED=1"' -Wait
+          }
       - name: Update Hyper-V
         shell: pwsh
         run: |
