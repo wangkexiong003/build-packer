@@ -117,7 +117,7 @@ source "hyperv-iso" "vm" {
   headless         = var.headless
   http_directory   = local.http_directory
   iso_checksum     = var.iso_checksum
-  iso_url          = var.iso_url
+  iso_urls         = length(var.iso_urls) > 0 ? var.iso_urls : [var.iso_url]
   memory           = local.memory
   output_directory = "${local.output_directory}-hyperv"
   shutdown_command = local.shutdown_command

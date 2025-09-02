@@ -379,6 +379,10 @@ variable "iso_url" {
   default     = null
   description = "ISO download url"
 }
+variable "iso_urls" {
+  type    = list(string)
+  default = []
+}
 variable "memory" {
   type    = number
   default = null
