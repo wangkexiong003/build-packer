@@ -33,14 +33,10 @@ jobs:
       - name: Setup vmwareworkstation
         shell: pwsh
         run: |
-          choco install vmwareworkstation --yes
-          if ($LASTEXITCODE -ne 0) {
-            Write-Host "Failed installing from Chocolatey, try from Google Drive..."
-            rclone copy gdrive:/download $env:Temp --include "VMware-workstation-full-*.exe"
-            dir $env:Temp\VMware*.exe
-            $installer = Get-Item "$env:Temp\VMware-workstation-full-*.exe"
-            Start-Process -FilePath $installer.FullName -ArgumentList '/s', '/v"/qn EULAS_AGREED=1"' -Wait
-          }
+          rclone copy gdrive:/download $env:Temp --include "VMware-workstation-full-*.exe"
+          dir $env:Temp\VMware*.exe
+          $installer = Get-Item "$env:Temp\VMware-workstation-full-*.exe"
+          Start-Process -FilePath $installer.FullName -ArgumentList '/s', '/v"/qn EULAS_AGREED=1"' -Wait
       - name: Update Hyper-V
         shell: pwsh
         run: |
