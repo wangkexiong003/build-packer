@@ -83,7 +83,8 @@ build {
       "COUNTRY=${var.country}",
       "http_proxy=${var.http_proxy}",
       "https_proxy=${var.https_proxy}",
-      "no_proxy=${var.no_proxy}"
+      "no_proxy=${var.no_proxy}",
+      "PACKER_BUILDER_TYPE=${build.Type}"
     ]
     execute_command = var.os_name == "ubuntu" ? (
       "echo 'vagrant' | {{ .Vars }} sudo -S -E bash -eux '{{ .Path }}'"
