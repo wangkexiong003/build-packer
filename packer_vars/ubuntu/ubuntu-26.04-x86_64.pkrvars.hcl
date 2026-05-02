@@ -1,7 +1,7 @@
 os_name                 = "ubuntu"
 os_version              = "26.04"
 os_arch                 = "x86_64"
-iso_urls                = ["https://releases.ubuntu.com/releases/26.04/ubuntu-26.04-live-server-amd64.iso", "https://old-releases.ubuntu.com/releases/26.04/ubuntu-26.04-live-server-amd64.iso"]
+iso_urls                = ["https://mirrors.edge.kernel.org/ubuntu-releases/26.04/ubuntu-26.04-live-server-amd64.iso", "https://old-releases.ubuntu.com/releases/26.04/ubuntu-26.04-live-server-amd64.iso"]
 iso_checksum            = "sha256:dec49008a71f6098d0bcfc822021f4d042d5f2db279e4d75bdd981304f1ca5d9"
 vbox_guest_os_type      = "Ubuntu_64"
 vmware_guest_os_type    = "ubuntu-64"
