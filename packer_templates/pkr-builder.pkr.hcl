@@ -2,7 +2,7 @@ packer {
   required_version = ">= 1.7.0"
   required_plugins {
     hyperv = {
-      version = ">= 1.0.0"
+      version = ">= 1.0.3"
       source  = "github.com/hashicorp/hyperv"
     }
     qemu = {
@@ -10,15 +10,15 @@ packer {
       source  = "github.com/hashicorp/qemu"
     }
     vagrant = {
-      version = ">= 1.0.2"
+      version = ">= 1.1.0"
       source  = "github.com/hashicorp/vagrant"
     }
     virtualbox = {
-      version = ">= 0.0.1"
+      version = ">= 1.0.3"
       source  = "github.com/hashicorp/virtualbox"
     }
     vmware = {
-      version = ">= 1.0.9"
+      version = ">= 1.1.0"
       source  = "github.com/hashicorp/vmware"
     }
   }
@@ -71,6 +71,7 @@ locals {
 build {
   sources = [
     "sources.hyperv-iso.vm",
+    "sources.qemu.vm",
     "sources.virtualbox-iso.vm",
     "sources.vmware-iso.vm"
   ]

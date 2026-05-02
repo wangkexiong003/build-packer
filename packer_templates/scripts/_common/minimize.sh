@@ -1,9 +1,5 @@
 #!/bin/sh -eux
 
-case "${PACKER_BUILDER_TYPE}" in
-  qemu) exit 0 ;;
-esac
-
 set +e
 swapuuid=$(blkid -o value -l -s UUID -t TYPE=swap)
 case "$?" in

@@ -136,6 +136,9 @@ source "qemu" "vm" {
   accelerator         = var.qemu_accelerator
   display             = local.qemu_display
   use_default_display = local.qemu_use_default_display
+  disk_compression    = var.qemu_disk_compression
+  disk_detect_zeroes  = var.qemu_disk_detect_zeroes
+  disk_discard        = var.qemu_disk_discard
   disk_image          = var.qemu_disk_image
   efi_boot            = var.qemu_efi_boot
   efi_firmware_code   = var.qemu_efi_firmware_code
@@ -143,6 +146,7 @@ source "qemu" "vm" {
   efi_drop_efivars    = var.qemu_efi_drop_efivars
   format              = var.qemu_format
   machine_type        = local.qemu_machine_type
+  net_device          = var.qemu_net_device
   qemu_binary         = local.qemu_binary
   qemuargs            = local.qemuargs
   # Source block common options
@@ -156,7 +160,7 @@ source "qemu" "vm" {
   headless         = var.headless
   http_directory   = local.http_directory
   iso_checksum     = var.iso_checksum
-  iso_url          = var.iso_url
+  iso_urls         = length(var.iso_urls) > 0 ? var.iso_urls : [var.iso_url]
   memory           = local.memory
   output_directory = "${local.output_directory}-qemu"
   shutdown_command = local.shutdown_command
@@ -186,6 +190,7 @@ source "virtualbox-iso" "vm" {
   # Source block common options
   boot_command     = var.boot_command
   boot_wait        = var.vbox_boot_wait == null ? local.default_boot_wait : var.vbox_boot_wait
+  cd_files         = local.cd_files
   cpus             = var.cpus
   communicator     = local.communicator
   disk_size        = var.disk_size
@@ -193,7 +198,7 @@ source "virtualbox-iso" "vm" {
   headless         = var.headless
   http_directory   = local.http_directory
   iso_checksum     = var.iso_checksum
-  iso_url          = var.iso_url
+  iso_urls         = length(var.iso_urls) > 0 ? var.iso_urls : [var.iso_url]
   memory           = local.memory
   output_directory = "${local.output_directory}-virtualbox"
   shutdown_command = local.shutdown_command
@@ -217,6 +222,8 @@ source "virtualbox-ovf" "vm" {
   # Source block common options
   communicator     = local.communicator
   headless         = var.headless
+  iso_urls         = length(var.iso_urls) > 0 ? var.iso_urls : [var.iso_url]
+  iso_checksum     = var.iso_checksum
   output_directory = "${local.output_directory}-virtualbox-ovf"
   shutdown_command = local.shutdown_command
   shutdown_timeout = var.shutdown_timeout
@@ -242,6 +249,7 @@ source "vmware-iso" "vm" {
   # Source block common options
   boot_command     = var.boot_command
   boot_wait        = var.vmware_boot_wait == null ? local.default_boot_wait : var.vmware_boot_wait
+  cd_files         = local.cd_files
   cpus             = var.cpus
   communicator     = local.communicator
   disk_size        = var.disk_size
@@ -249,7 +257,7 @@ source "vmware-iso" "vm" {
   headless         = var.headless
   http_directory   = local.http_directory
   iso_checksum     = var.iso_checksum
-  iso_url          = var.iso_url
+  iso_urls         = length(var.iso_urls) > 0 ? var.iso_urls : [var.iso_url]
   memory           = local.memory
   output_directory = "${local.output_directory}-vmware"
   shutdown_command = local.shutdown_command

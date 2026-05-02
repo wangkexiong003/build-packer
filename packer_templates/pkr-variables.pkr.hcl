@@ -41,15 +41,6 @@ variable "country" {
   default     = "US"
   description = "Country code"
 }
-variable "sources_enabled" {
-  type = list(string)
-  default = [
-    "source.qemu.vm",
-    "source.virtualbox-iso.vm",
-    "source.vmware-iso.vm",
-  ]
-  description = "Build Sources to use for building vagrant boxes"
-}
 
 # Source block provider specific variables
 # hyperv-iso
@@ -150,6 +141,18 @@ variable "qemu_boot_wait" {
   type    = string
   default = null
 }
+variable "qemu_disk_compression" {
+  type    = bool
+  default = true
+}
+variable "qemu_disk_detect_zeroes" {
+  type    = string
+  default = "unmap"
+}
+variable "qemu_disk_discard" {
+  type    = string
+  default = "unmap"
+}
 variable "qemu_display" {
   type        = string
   default     = null
@@ -162,7 +165,7 @@ variable "qemu_use_default_display" {
 }
 variable "qemu_disk_image" {
   type        = bool
-  default     = null
+  default     = false
   description = "Whether iso_url is a bootable qcow2 disk image"
 }
 variable "qemu_efi_boot" {
@@ -182,7 +185,7 @@ variable "qemu_efi_firmware_vars" {
 }
 variable "qemu_efi_drop_efivars" {
   type        = bool
-  default     = false
+  default     = true
   description = "Drop EFI vars"
 }
 variable "qemu_format" {
@@ -197,6 +200,10 @@ variable "qemu_format" {
 variable "qemu_machine_type" {
   type    = string
   default = null
+}
+variable "qemu_net_device" {
+  type    = string
+  default = "virtio-net-pci"
 }
 variable "qemuargs" {
   type    = list(list(string))

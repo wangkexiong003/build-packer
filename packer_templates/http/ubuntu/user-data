@@ -3,14 +3,16 @@
 autoinstall:
   version: 1
   early-commands:
-    - systemctl stop ssh
+    - systemctl stop ssh.service
+    - systemctl stop ssh.socket
   identity:
     hostname: vagrant
     username: vagrant
     password: $6$vagrant.$sd6r0/OKL.FIGZbhanVkrLassSxoPRv1h5lkISsmBONqaLUGVXkEcD22Ddak5W8JSxeU0VFkU/We1Y7o4hVO/1
   packages: [linux-image-generic, linux-cloud-tools-virtual]
   ssh:
-    install-server: true
+    install-server: yes
+    allow-pw: yes
 
   storage:
 ## Layout-short
