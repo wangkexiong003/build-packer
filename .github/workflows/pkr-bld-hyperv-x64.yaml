@@ -1,5 +1,6 @@
 name: Build vagrant images with hyperv provider
 on:
+  push:
   workflow_dispatch:
   workflow_call:
 
@@ -15,6 +16,7 @@ jobs:
         os:
           - archlinux
           - ubuntu-24.04
+          - ubuntu-26.04
         provider:
           - hyperv-iso
     steps:
