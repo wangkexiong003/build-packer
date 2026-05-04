@@ -72,11 +72,9 @@ apt-get -y purge --autoremove linux-firmware
 PKGS_OTHER=( \
   usbutils \
   libusb-1.0-0 \
-  binutils \
   console-setup \
   console-setup-linux \
   cpp* \
-  wireless-regdb \
   eject \
   file \
   keyboard-configuration \

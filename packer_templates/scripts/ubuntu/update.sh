@@ -6,7 +6,7 @@ major_version="$(echo ${ubuntu_version} | awk -F. '{print $1}')";
 
 # Disable release-upgrades
 if [ -f /etc/update-manager/release-upgrades ]; then
-  sed -i.bak 's/^Prompt=.*$/Prompt=never/' /etc/update-manager/release-upgrades;
+  sed -i 's/^Prompt=.*$/Prompt=never/' /etc/update-manager/release-upgrades;
 fi
 
 # Disable systemd apt timers/services
