@@ -9,7 +9,7 @@ autoinstall:
     hostname: vagrant
     username: vagrant
     password: $6$vagrant.$sd6r0/OKL.FIGZbhanVkrLassSxoPRv1h5lkISsmBONqaLUGVXkEcD22Ddak5W8JSxeU0VFkU/We1Y7o4hVO/1
-  packages: [linux-image-generic, linux-cloud-tools-virtual]
+  packages: [linux-virtual, linux-cloud-tools-virtual]
   ssh:
     install-server: yes
     allow-pw: yes
