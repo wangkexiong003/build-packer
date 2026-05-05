@@ -13,6 +13,16 @@ autoinstall:
   ssh:
     install-server: yes
     allow-pw: yes
+  # Ensure virtio and HyperV drivers load early for networking and storage
+  late-commands:
+    - echo 'virtio_net hv_vmbus hv_storvsc hv_utils' >> /target/etc/initramfs-tools/modules
+    - chroot /target update-initramfs -u
+    # Debug: Check what modules are in initramfs
+    - chroot /target lsinitramfs /boot/initrd.img-$(chroot /target uname -r) | grep -E "(virtio|hv)" || echo "No virtio/hv modules found in initramfs"
+    # Debug: Check network interfaces after boot
+    - chroot /target ip link show || echo "Failed to get network interfaces"
+  # Wait for network interfaces to be ready before continuing
+  wait_on_all_interfaces: true
 
   storage:
 ## Layout-short
