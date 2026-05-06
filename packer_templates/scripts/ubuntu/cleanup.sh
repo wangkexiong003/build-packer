@@ -1,5 +1,8 @@
 #!/bin/bash -eux
 
+ubuntu_version="$(lsb_release -r | awk '{print $2}')";
+major_version="$(echo ${ubuntu_version} | awk -F. '{print $1}')";
+
 echo "remove linux-headers"
 dpkg --list \
   | awk '{ print $2 }' \
@@ -98,6 +101,13 @@ PKGS_OTHER=( \
   snapd \
 );
 apt-get -y purge --autoremove "${PKGS_OTHER[@]}";
+
+if [ "${major_version}" -le 24 ]; then
+  PKGS_EXTRA=( \
+    wireless-regdb \
+  );
+  apt-get -y purge --autoremove "${PKGS_EXTRA[@]}";
+fi
 
 # 24.04+ don't have this
 PKGS_OTHER_ADDITION=( \
