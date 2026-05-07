@@ -148,3 +148,10 @@ rm -f /root/.wget-hsts
 sed -i '/.*\/media\/floppy.*/d' /etc/fstab
 
 export HISTSIZE=0
+
+uname -a
+lsb_release -a
+apt-mark showmanual
+dpkg-query -Wf '${Installed-Size}\t${Package}\n' | sort -n
+systemctl list-unit-files --state=enabled
+dpkg-query -W -f='${binary:Package}\n' | sort
