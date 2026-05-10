@@ -83,8 +83,6 @@ PKGS_OTHER=( \
   keyboard-configuration \
   krb5-locales \
   libmagic1 \
-  make \
-  manpages \
   netcat-openbsd \
   os-prober \
   tasksel \
@@ -116,6 +114,13 @@ PKGS_OTHER_ADDITION=( \
 );
 apt-get -y purge --autoremove "${PKGS_OTHER_ADDITION[@]}" || true;
 
+apt purge -y apport apport-core-dump-handler apport-symptoms python3-apport python3-problem-report
+apt purge -y packagekit packagekit-tools gir1.2-packagekitglib-1.0 libpackagekit-glib2-18
+apt purge -y ubuntu-pro-client ubuntu-pro-client-l10n
+apt purge -y tcpdump strace htop lsof screen tmux mtr-tiny
+apt purge -y telnet inetutils-telnet ftp tnftp
+apt purge -y open-iscsi libopeniscsiusr multipath-tools
+
 echo "autoremoving packages and cleaning apt data"
 apt-get -y autoremove;
 apt-get -y clean;
@@ -125,11 +130,15 @@ rm -rf /var/log/vboxadd*
 
 echo "remove /usr/share/doc/"
 rm -rf /usr/share/doc/*
+rm -rf /usr/share/man/*
+rm -rf /usr/share/info/*
 
 echo "remove /var/cache"
 find /var/cache -type f -exec rm -rf {} \;
 
 echo "truncate any logs that have built up during the install"
+journalctl --rotate
+journalctl --vacuum-time=1s
 find /var/log -type f -exec truncate --size=0 {} \;
 
 echo "blank netplan machine-id (DUID) so machines get unique ID generated on boot"
@@ -148,10 +157,3 @@ rm -f /root/.wget-hsts
 sed -i '/.*\/media\/floppy.*/d' /etc/fstab
 
 export HISTSIZE=0
-
-uname -a
-lsb_release -a
-apt-mark showmanual
-dpkg-query -Wf '${Installed-Size}\t${Package}\n' | sort -n
-systemctl list-unit-files --state=enabled
-dpkg-query -W -f='${binary:Package}\n' | sort
